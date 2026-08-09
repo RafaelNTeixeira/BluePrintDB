@@ -2,50 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  BluePrintDB runs a single, deliberate dark "drafting table" theme rather
+  than a light/dark toggle — the blueprint palette (deep navy canvas, cyan
+  linework, amber secondary accent) is the product's visual identity, not
+  a mode. CSS variables are kept for shadcn/ui primitives that expect them;
+  most custom components in this app reference the hex values directly.
+*/
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --background: 205 60% 10%;
+    --foreground: 200 60% 94%;
+    --card: 205 55% 16%;
+    --card-foreground: 200 60% 94%;
+    --popover: 205 55% 16%;
+    --popover-foreground: 200 60% 94%;
+    --primary: 190 65% 62%;
+    --primary-foreground: 205 60% 10%;
+    --secondary: 202 55% 21%;
+    --secondary-foreground: 200 60% 94%;
+    --muted: 202 45% 24%;
+    --muted-foreground: 200 30% 65%;
+    --accent: 202 55% 21%;
+    --accent-foreground: 200 60% 94%;
+    --destructive: 5 65% 63%;
+    --destructive-foreground: 200 60% 94%;
+    --border: 202 45% 32%;
+    --input: 202 45% 32%;
+    --ring: 190 65% 62%;
+    --radius: 0.375rem;
   }
 }
 
@@ -58,7 +43,29 @@
   }
 }
 
-/* react-flow canvas background dots use CSS vars so it respects light/dark mode */
+/* --------------------------------------------------------------------- */
+/* react-flow theme overrides                                            */
+/* --------------------------------------------------------------------- */
+
 .react-flow__background {
-  background-color: hsl(var(--background));
+  background-color: #0b2138;
+}
+
+.react-flow__attribution {
+  background: transparent;
+}
+.react-flow__attribution a {
+  color: #4c86ac;
+}
+
+/* Selection marquee (drag-to-select box) tinted to match the accent color */
+.react-flow__selection {
+  background: rgba(87, 199, 227, 0.08);
+  border: 1px solid rgba(87, 199, 227, 0.5);
+}
+
+/* Edge currently being dragged from a handle */
+.react-flow__connection-path {
+  stroke: #57c7e3;
+  stroke-width: 1.5;
 }
