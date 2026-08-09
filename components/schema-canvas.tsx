@@ -5,6 +5,7 @@ import ReactFlow, {
   Background,
   BackgroundVariant,
   Controls,
+  MarkerType,
   Panel,
   useReactFlow,
   type NodeTypes,
@@ -92,7 +93,15 @@ export function SchemaCanvas() {
         onPaneContextMenu={handlePaneContextMenu}
         onNodeContextMenu={handleNodeContextMenu}
         onMoveStart={closeMenu}
-        defaultEdgeOptions={{ type: "relation" }}
+        defaultEdgeOptions={{
+          type: "relation",
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            width: 16,
+            height: 16,
+            color: "#4C86AC",
+          },
+        }}
         minZoom={0.25}
         maxZoom={2}
         fitView
@@ -115,7 +124,8 @@ export function SchemaCanvas() {
               </p>
               <p className="text-xs text-[#4C86AC]/70">
                 Right-click anywhere, or use "Add table" above, to start
-                drafting your schema.
+                drafting your schema. Drag between column dots to connect
+                tables, then click the relationship to set its type.
               </p>
             </div>
           </Panel>

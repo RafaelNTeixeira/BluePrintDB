@@ -92,3 +92,31 @@ toolbar's "Add table" button. Edit the table name and column fields
 directly on the node. Drag from one column's right-hand dot to another
 table's column to draw a relationship (it currently defaults to `1:N` —
 Phase 3 makes this editable by clicking the edge label).
+
+## Status: Phase 3 — Connecting Nodes & Relationship Mapping ✅
+
+Relationships are now fully interactive.
+
+**What's new:**
+- **`lib/store.ts`** — `onConnect` now parses the handle ids from the
+  connection (`${columnId}-source` / `${columnId}-target`) and stores the
+  resolved `sourceColumnId` / `targetColumnId` on the new edge's `data`
+  right away, defaulting `relationType` to `one-to-many` (the most common
+  FK shape). This is exactly the data Phase 4's code generator needs to
+  emit accurate foreign keys.
+- **`components/relation-edge.tsx`** — click the line itself (a wide,
+  invisible hit area) or its `1:N`-style pill to open a menu that:
+  - shows exactly which two columns this relationship binds, e.g.
+    `orders.user_id → users.id`;
+  - lets you pick **1 to 1**, **1 to many**, or **many to many** (with a
+    checkmark on the current selection);
+  - includes a **Delete relationship** action.
+- **`components/ui/dropdown-menu.tsx`** — the Radix-based menu primitive
+  backing the picker above.
+- **`components/schema-canvas.tsx`** — edges now render with a directional
+  arrowhead (`markerEnd`) pointing at the referenced/parent side of the
+  relationship, and the empty-state hint mentions the new interaction.
+
+**Try it:** drag from one column's right-hand dot to another table's
+left-hand dot to connect them — it starts as `1:N`. Click anywhere on that
+new line (or its pill) to change it to `1:1` / `N:N`, or delete it.

@@ -134,6 +134,16 @@ export const useSchemaStore = create<SchemaState>()(
 
     onConnect: (connection) => {
       set((state) => {
+        // Handles are named `${columnId}-source` / `${columnId}-target`
+        // (see table-node.tsx), so we can recover exactly which columns
+        // this relationship binds without any extra lookup.
+        const sourceColumnId = connection.sourceHandle?.endsWith("-source")
+          ? connection.sourceHandle.slice(0, -"-source".length)
+          : undefined;
+        const targetColumnId = connection.targetHandle?.endsWith("-target")
+          ? connection.targetHandle.slice(0, -"-target".length)
+          : undefined;
+
         const newEdge: RelationEdge = {
           id: `e-${nanoid(8)}`,
           source: connection.source!,
@@ -142,7 +152,12 @@ export const useSchemaStore = create<SchemaState>()(
           targetHandle: connection.targetHandle ?? undefined,
           type: "relation",
           data: {
+            // 1-to-many is the most common FK shape (many rows referencing
+            // one parent row), so it's the sensible default; the user can
+            // change it by clicking the edge.
             relationType: "one-to-many",
+            sourceColumnId,
+            targetColumnId,
           },
         };
         state.edges.push(newEdge);
