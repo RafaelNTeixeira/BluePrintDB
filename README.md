@@ -178,3 +178,51 @@ pass clean.
 - `pluralize`/`singularize` are intentionally simple heuristics (not a
   full English pluralizer) — they only affect *derived* relation field
   names, never the actual table/column identifiers you typed.
+
+## Status: Phase 5 — Export Panel ✅ (all 5 phases complete)
+
+The last piece: a slide-out panel that turns the live canvas into code you
+can actually copy or download.
+
+**New:**
+- **`components/export-panel.tsx`** — click "Export code" in the toolbar
+  to slide out a right-side panel with tabs for **SQL / Prisma / Drizzle**.
+  The code preview is generated straight from the live Zustand store on
+  every render (`generateCode(exportFormat, nodes, edges)`) — there's no
+  separate "generate" step; edit a table with the panel open and the code
+  updates immediately. Includes **Copy to clipboard** (with a brief
+  "Copied!" confirmation) and **Download** (saves `schema.sql` /
+  `schema.prisma` / `schema.ts` via an in-browser Blob — no server involved).
+- **`lib/syntax-highlight.ts`** — a small, dependency-free syntax
+  highlighter built specifically for this panel. It HTML-escapes the
+  source *before* tokenizing, and tokenizes in a single regex pass (one
+  combined pattern with named capture groups), which is what makes it
+  safe to render with `dangerouslySetInnerHTML` even though the source
+  embeds table/column names you typed yourself — a malicious table name
+  like `<script>...</script>` renders as inert escaped text, verified by
+  hand during development.
+- **`components/code-block.tsx`** — the scrollable, monospace code viewer.
+- **`components/ui/dialog.tsx`** — a Radix Dialog styled as a slide-out
+  sheet (pinned to the right edge) rather than a centered modal.
+- **`components/ui/tabs.tsx`** — the Radix Tabs primitive backing the
+  format switcher.
+
+**Try it:** build a table or two, then click **Export code** in the
+toolbar. Switch between SQL / Prisma / Drizzle with the tabs, copy or
+download whichever you need.
+
+---
+
+### The whole app, end to end
+
+1. **Canvas** — right-click or "Add table" to drop a table; edit its name
+   and columns (type, PK/UQ/N? toggles) directly on the node.
+2. **Relationships** — drag between column handles to connect two tables;
+   click the resulting line to set it to 1:1 / 1:N / N:N or delete it.
+3. **Export** — click "Export code" any time to see the exact SQL, Prisma,
+   or Drizzle schema that matches what's on the canvas, and copy or
+   download it.
+
+Everything runs client-side in the browser — no backend, no database
+connection, no server round-trip for codegen. `npm install && npm run dev`
+is the whole setup.

@@ -3,6 +3,7 @@
 import { Compass, Plus } from "lucide-react";
 import { useSchemaStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
+import { ExportPanel } from "@/components/export-panel";
 
 export function Toolbar() {
   const addTable = useSchemaStore((s) => s.addTable);
@@ -21,6 +22,7 @@ export function Toolbar() {
         <Plus className="h-3.5 w-3.5" />
         Add table
       </Button>
+      <ExportPanel />
       <span className="text-xs text-[#8FB4CC]">
         {tableCount} table{tableCount === 1 ? "" : "s"}
       </span>
