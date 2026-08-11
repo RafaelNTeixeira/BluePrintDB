@@ -1,13 +1,103 @@
-# BluePrintDB — Visual Database Schema & Code Generator
+<div align="center">
 
-Design database schemas visually and instantly export SQL, Prisma, or Drizzle code. 100% client-side, zero backend.
+# BluePrintDB
 
-## Status: Phase 1 — Setup & State Management ✅
+**Design your database schema visually. Export the exact SQL, Prisma, or Drizzle code to build it.**
 
-This build contains the project scaffold and the Zustand state layer only.
-There is no visual canvas yet — that's Phase 2. The `/` page is a temporary
-debug view with "+ Add Table" / "+ Add Column" buttons that prove the store
-works, rendering live JSON of the `nodes` and `edges` arrays.
+100% client-side · No backend · No database connection required to design
+
+[![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org)
+[![React Flow](https://img.shields.io/badge/React%20Flow-11-ff0072)](https://reactflow.dev)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=REPLACE_WITH_YOUR_GITHUB_REPO_URL)
+
+</div>
+
+<br />
+
+<p align="center">
+  <img src="screenshots/hero.png" alt="BluePrintDB canvas with several connected tables" width="100%" />
+</p>
+
+<!--
+  👋 Replace screenshots/hero.png (and the other files in /screenshots)
+  with your own screenshots — see screenshots/README.md for exactly
+  which files to add and tips for taking good ones.
+-->
+
+## What it is
+
+BluePrintDB is a visual database schema designer that runs entirely in
+your browser. Drag out tables, add typed columns, draw relationships
+between them — and get back real, runnable **PostgreSQL**, **Prisma**, or
+**Drizzle ORM** code the moment you need it. There's no database
+connection, no account, and no server round-trip: the whole app is a
+static Next.js site that keeps your schema in memory on the client.
+
+## Features
+
+**🗂️ Visual canvas**
+- Pan/zoom canvas built on [React Flow](https://reactflow.dev)
+- Right-click anywhere (or use the toolbar) to drop a new table
+- Editable table names and columns directly on the node
+
+**🧱 Table & column modeling**
+- Data types: UUID, Int, BigInt, Float, Decimal, Varchar, Text, Boolean, Timestamp, Date, JSON
+- Per-column **PK** / **UQ** / **N?** (nullable) toggles
+- Duplicate or delete a table in one click
+
+**🔗 Relationship mapping**
+- Drag between column handles to connect two tables — anchored to the
+  *exact* columns, not just the tables
+- Click any relationship to set it to **1:1**, **1:N**, or **N:N**, or delete it
+- Self-referential relationships (e.g. a `manager_id` pointing back at
+  the same table) are handled correctly, including for many-to-many
+
+**⚙️ Live code generation**
+- **SQL** — `CREATE TABLE` statements, composite primary keys, auto-generated
+  join tables for many-to-many, and `ALTER TABLE ... FOREIGN KEY` constraints
+- **Prisma** — a complete `schema.prisma` with `@relation`-mapped fields,
+  automatic disambiguation when a table has two FKs to the same parent
+  (e.g. `author`/`editor`), and Prisma's implicit many-to-many
+- **Drizzle** — a `pg-core` schema with correctly chained column builders,
+  composite keys, join tables, and `relations()` blocks for the relational
+  query API
+
+**📋 Export panel**
+- Tabs to switch between SQL / Prisma / Drizzle
+- Syntax-highlighted, always in sync with the live canvas
+- One-click **Copy to clipboard** or **Download** as a real file
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%">
+      <img src="screenshots/table-node.png" alt="A table node close-up" width="100%" />
+      <p align="center"><sub>Table node — columns, types, and constraints</sub></p>
+    </td>
+    <td width="50%">
+      <img src="screenshots/relationship-picker.png" alt="Relationship type picker" width="100%" />
+      <p align="center"><sub>Click a relationship to set 1:1 / 1:N / N:N</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" colspan="2">
+      <img src="screenshots/export-panel.png" alt="Export panel with generated code" width="100%" />
+      <p align="center"><sub>Export panel — SQL, Prisma, or Drizzle, ready to copy</sub></p>
+    </td>
+  </tr>
+</table>
+
+## Tech stack
+
+| Layer | Choice |
+|---|---|
+| Framework | [Next.js 14](https://nextjs.org) (App Router) |
+| Canvas | [React Flow](https://reactflow.dev) |
+| State | [Zustand](https://github.com/pmndrs/zustand) + Immer |
+| Styling | [Tailwind CSS](https://tailwindcss.com) + [shadcn/ui](https://ui.shadcn.com)-style primitives (Radix UI) |
+| Codegen | Hand-written generators in `lib/codegen/` — no external templating engine |
 
 ## Getting started
 
@@ -16,213 +106,83 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open [http://localhost:3000](http://localhost:3000). That's it — no
+environment variables, no database, nothing else to configure.
+
+## Deploy to Vercel
+
+This is a standard Next.js App Router project, so it deploys on Vercel
+with zero configuration.
+
+**Option A — one click:** push this repo to GitHub, then update the
+"Deploy with Vercel" button at the top of this README with your repo URL,
+or go to [vercel.com/new](https://vercel.com/new) and import the repo directly.
+
+**Option B — CLI:**
+```bash
+npm i -g vercel
+vercel
+```
+
+There's nothing else to set up — no environment variables, no database
+provisioning, no build-step configuration. `npm run build` is all Vercel
+needs to run.
 
 ## Project structure
 
 ```
 blueprintdb/
 ├── app/
-│   ├── layout.tsx        # Root layout, imports global styles
-│   ├── page.tsx          # Phase 1 debug page (replaced by canvas in Phase 2)
-│   └── globals.css       # Tailwind directives + shadcn/ui CSS variable theme
-├── components/           # Empty for now — custom nodes/edges/UI land here in Phase 2+
+│   ├── layout.tsx            # Root layout, imports reactflow + global styles
+│   ├── page.tsx               # Mounts the canvas
+│   └── globals.css            # Tailwind + the blueprint color theme
+├── components/
+│   ├── schema-canvas.tsx      # The react-flow canvas: pan/zoom, right-click menu
+│   ├── table-node.tsx         # Custom table node: columns, types, constraints
+│   ├── relation-edge.tsx      # Interactive relationship line + type picker
+│   ├── toolbar.tsx            # Add table / Export code
+│   ├── export-panel.tsx       # Slide-out panel: tabs, copy, download
+│   ├── code-block.tsx         # Syntax-highlighted code viewer
+│   └── ui/                    # Button, Input, Select, Tabs, Dialog, etc.
 ├── lib/
-│   ├── types.ts          # Domain model: Column, TableNodeData, RelationEdgeData, etc.
-│   ├── store.ts          # Zustand store: nodes, edges, all table/column/edge CRUD actions
-│   └── utils.ts          # `cn()` classname helper used by shadcn/ui components
-├── components.json       # shadcn/ui CLI config (for `npx shadcn add <component>` later)
-├── tailwind.config.ts
-├── postcss.config.mjs
-├── next.config.mjs
-├── tsconfig.json
-└── package.json
+│   ├── types.ts                # Column, TableNodeData, RelationEdgeData, ...
+│   ├── store.ts                # Zustand store — the single source of truth
+│   ├── syntax-highlight.ts     # Small dependency-free code highlighter
+│   └── codegen/
+│       ├── resolve-schema.ts   # Shared IR: resolves edges into concrete FKs
+│       ├── generate-sql.ts
+│       ├── generate-prisma.ts
+│       ├── generate-drizzle.ts
+│       └── index.ts            # generateCode(format, nodes, edges)
+└── screenshots/                 # Drop your own screenshots here
 ```
 
-## Tech stack
+## How it works
 
-- Next.js 14 (App Router)
-- react-flow (`reactflow` package) — canvas, nodes, edges
-- Zustand + Immer — state management
-- Tailwind CSS + shadcn/ui — styling
-- nanoid — id generation
+Everything on the canvas — every table, column, and relationship — lives
+in a single Zustand store (`lib/store.ts`). The `lib/codegen/` module is
+completely decoupled from React: it's a set of pure functions that take
+the current `nodes`/`edges` arrays and return a string. The export panel
+just calls `generateCode(format, nodes, edges)` on every render, so the
+preview is always exactly what the canvas currently describes — there's
+no separate "build" or "sync" step.
 
-## Roadmap
+## Known limitations
 
-- **Phase 1 (this build):** Zustand store + types ✅
-- **Phase 2:** react-flow canvas + custom Table Node UI
-- **Phase 3:** Relationship edges + edge-type picker
-- **Phase 4:** SQL / Prisma / Drizzle code generation engine
-- **Phase 5:** Export panel with tabs + copy-to-clipboard
+- **No persistence yet** — the schema lives in memory and resets on page
+  reload. (A natural next step would be `localStorage` or a shareable
+  URL-encoded schema.)
+- **Pluralization is a heuristic** — relation field names like `posts` or
+  `following`/`followedBy` use a small best-effort English pluralizer, not
+  a full NLP library. It only affects generated *field names*, never your
+  actual table/column identifiers.
+- **One SQL dialect** — the SQL export targets PostgreSQL specifically
+  (e.g. `gen_random_uuid()`, `JSONB`).
 
-## Status: Phase 2 — Canvas & Custom Table Node ✅
+## License
 
-The real visual canvas is live at `/`, replacing the Phase 1 debug page.
-
-**What's new:**
-- `components/schema-canvas.tsx` — the `react-flow` canvas: pan/zoom, a
-  right-click context menu ("Add table here") that drops a new table at
-  the exact cursor position, an empty-state hint, and a styled `Controls`
-  (zoom/fit-view) widget.
-- `components/table-node.tsx` — the custom Table Node: editable table
-  name, per-row column editing (name, data-type `Select`, and PK / UQ / N?
-  constraint toggle badges), an "Add column" footer button, and
-  duplicate/delete actions that appear on header hover.
-- `components/relation-edge.tsx` — a custom orthogonal ("schematic trace")
-  edge type with a small relationship-type pill (currently shows the
-  default `1:N`; becomes editable in Phase 3).
-- `components/toolbar.tsx` — floating top-left toolbar with the
-  BluePrintDB wordmark, an "Add table" button, and a live table count.
-- `components/ui/*` — `button`, `input`, `select`, `tooltip`, and the
-  `constraint-badge` toggle, all styled for the dark "blueprint" theme.
-
-**Design direction:** a literal blueprint / drafting-table aesthetic (deep
-navy canvas, cyan schematic linework, amber secondary accent, monospace
-type for anything code-like) — grounded in the product's own name rather
-than a generic template.
-
-**Connection model:** every column row has its own source (right) and
-target (left) handle, keyed by column id. This means a relationship can
-already be anchored to a specific column pair (e.g. `orders.user_id` →
-`users.id`) as soon as it's drawn — which is exactly the data Phase 3's
-relationship-type picker and Phase 4's code generator will need.
-
-**Try it:** right-click empty canvas space → "Add table here", or use the
-toolbar's "Add table" button. Edit the table name and column fields
-directly on the node. Drag from one column's right-hand dot to another
-table's column to draw a relationship (it currently defaults to `1:N` —
-Phase 3 makes this editable by clicking the edge label).
-
-## Status: Phase 3 — Connecting Nodes & Relationship Mapping ✅
-
-Relationships are now fully interactive.
-
-**What's new:**
-- **`lib/store.ts`** — `onConnect` now parses the handle ids from the
-  connection (`${columnId}-source` / `${columnId}-target`) and stores the
-  resolved `sourceColumnId` / `targetColumnId` on the new edge's `data`
-  right away, defaulting `relationType` to `one-to-many` (the most common
-  FK shape). This is exactly the data Phase 4's code generator needs to
-  emit accurate foreign keys.
-- **`components/relation-edge.tsx`** — click the line itself (a wide,
-  invisible hit area) or its `1:N`-style pill to open a menu that:
-  - shows exactly which two columns this relationship binds, e.g.
-    `orders.user_id → users.id`;
-  - lets you pick **1 to 1**, **1 to many**, or **many to many** (with a
-    checkmark on the current selection);
-  - includes a **Delete relationship** action.
-- **`components/ui/dropdown-menu.tsx`** — the Radix-based menu primitive
-  backing the picker above.
-- **`components/schema-canvas.tsx`** — edges now render with a directional
-  arrowhead (`markerEnd`) pointing at the referenced/parent side of the
-  relationship, and the empty-state hint mentions the new interaction.
-
-**Try it:** drag from one column's right-hand dot to another table's
-left-hand dot to connect them — it starts as `1:N`. Click anywhere on that
-new line (or its pill) to change it to `1:1` / `N:N`, or delete it.
-
-## Status: Phase 4 — Code Generation Engine ✅
-
-Pure, framework-free functions that turn the current canvas (nodes + edges)
-into real SQL / Prisma / Drizzle code. Nothing here touches React — Phase 5
-just calls `generateCode(format, nodes, edges)` and renders the string.
-
-**New module: `lib/codegen/`**
-- **`naming.ts`** — casing helpers (`toPascalCase`, `toCamelCase`) and a
-  best-effort `pluralize`/`singularize` used only for relation field names.
-- **`resolve-schema.ts`** — the shared intermediate representation every
-  generator builds on: resolves each edge into concrete child/parent
-  table+column references (falling back to each table's primary key if a
-  specific column wasn't captured), and deterministically resolves
-  many-to-many join-table naming — including the self-referential case
-  (e.g. users following users), where both sides need distinct column
-  names (`_a` / `_b` suffixes).
-- **`type-maps.ts`** — canonical data type → native SQL / Prisma type.
-- **`generate-sql.ts`** — `CREATE TABLE` statements (composite PK support,
-  `UNIQUE`/`NOT NULL`/`DEFAULT`), auto-generated join tables for N:N, and
-  `ALTER TABLE ... FOREIGN KEY` constraints (plus a `UNIQUE` constraint on
-  the FK side for 1:1).
-- **`generate-prisma.ts`** — a complete `schema.prisma` (generator +
-  datasource header, singular PascalCase model names with `@@map` back to
-  the real table name, `@relation`-mapped fields, and Prisma's implicit
-  array-field many-to-many). Automatically disambiguates when a table has
-  two FKs to the same parent (e.g. `posts.author_id` / `posts.editor_id`
-  both → `users.id`) with named `@relation("Post_Author", ...)` pairs.
-- **`generate-drizzle.ts`** — a Drizzle `pg-core` schema: correctly-typed
-  column builders, chained `.primaryKey()/.notNull()/.unique()/.default()
-  /.references()`, composite PKs via table-level `primaryKey({ columns })`,
-  join tables for N:N, and a `relations()` block per table for Drizzle's
-  relational query API.
-- **`index.ts`** — the single `generateCode(format, nodes, edges)`
-  dispatcher Phase 5's export panel will call.
-
-**How this was verified** (not just eyeballed): a fixture covering 1:1,
-1:N (including two FKs from the same table to the same parent), N:N,
-self-referential N:N, and a composite primary key was run through all
-three generators. That caught two real bugs before they shipped — a
-pluralization regex that turned "posts" into "postses", and a duplicate
-object-key bug in Drizzle's `relations()` blocks that would have silently
-dropped one of two FK relations pointing at the same parent table. Both
-are fixed. The resulting Prisma schema was then checked with a real
-Prisma-schema AST parser, and the Drizzle output was compiled for real
-against the actual `drizzle-orm` package with strict TypeScript — both
-pass clean.
-
-**Design choices worth knowing about:**
-- Prisma model names are singularized (`posts` → `Post`) per Prisma
-  convention; Drizzle/SQL keep your literal table name everywhere, since
-  neither has an equivalent "model name" concept.
-- Any user-supplied column default is treated as a raw SQL/Prisma/Drizzle
-  expression (via `sql\`...\`` in Drizzle) rather than guessed at as a
-  literal — so `now()`, `gen_random_uuid()`, or a plain `0` all work.
-- `pluralize`/`singularize` are intentionally simple heuristics (not a
-  full English pluralizer) — they only affect *derived* relation field
-  names, never the actual table/column identifiers you typed.
-
-## Status: Phase 5 — Export Panel ✅ (all 5 phases complete)
-
-The last piece: a slide-out panel that turns the live canvas into code you
-can actually copy or download.
-
-**New:**
-- **`components/export-panel.tsx`** — click "Export code" in the toolbar
-  to slide out a right-side panel with tabs for **SQL / Prisma / Drizzle**.
-  The code preview is generated straight from the live Zustand store on
-  every render (`generateCode(exportFormat, nodes, edges)`) — there's no
-  separate "generate" step; edit a table with the panel open and the code
-  updates immediately. Includes **Copy to clipboard** (with a brief
-  "Copied!" confirmation) and **Download** (saves `schema.sql` /
-  `schema.prisma` / `schema.ts` via an in-browser Blob — no server involved).
-- **`lib/syntax-highlight.ts`** — a small, dependency-free syntax
-  highlighter built specifically for this panel. It HTML-escapes the
-  source *before* tokenizing, and tokenizes in a single regex pass (one
-  combined pattern with named capture groups), which is what makes it
-  safe to render with `dangerouslySetInnerHTML` even though the source
-  embeds table/column names you typed yourself — a malicious table name
-  like `<script>...</script>` renders as inert escaped text, verified by
-  hand during development.
-- **`components/code-block.tsx`** — the scrollable, monospace code viewer.
-- **`components/ui/dialog.tsx`** — a Radix Dialog styled as a slide-out
-  sheet (pinned to the right edge) rather than a centered modal.
-- **`components/ui/tabs.tsx`** — the Radix Tabs primitive backing the
-  format switcher.
-
-**Try it:** build a table or two, then click **Export code** in the
-toolbar. Switch between SQL / Prisma / Drizzle with the tabs, copy or
-download whichever you need.
+MIT — do whatever you'd like with it.
 
 ---
 
-### The whole app, end to end
-
-1. **Canvas** — right-click or "Add table" to drop a table; edit its name
-   and columns (type, PK/UQ/N? toggles) directly on the node.
-2. **Relationships** — drag between column handles to connect two tables;
-   click the resulting line to set it to 1:1 / 1:N / N:N or delete it.
-3. **Export** — click "Export code" any time to see the exact SQL, Prisma,
-   or Drizzle schema that matches what's on the canvas, and copy or
-   download it.
-
-Everything runs client-side in the browser — no backend, no database
-connection, no server round-trip for codegen. `npm install && npm run dev`
-is the whole setup.
+<sub>See <a href="PHASES.md">PHASES.md</a> for the phase-by-phase build log this project was developed with.</sub>

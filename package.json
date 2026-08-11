@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "Visual Database Schema & Code Generator - design schemas visually, export SQL/Prisma/Drizzle.",
+  "engines": {
+    "node": ">=18.18.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -41,6 +44,6 @@
     "postcss": "8.4.40",
     "autoprefixer": "10.4.19",
     "eslint": "8.57.0",
-    "eslint-config-next": "14.2.5"
+    "eslint-config-next": "14.2.35"
   }
 }
