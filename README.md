@@ -120,3 +120,61 @@ Relationships are now fully interactive.
 **Try it:** drag from one column's right-hand dot to another table's
 left-hand dot to connect them — it starts as `1:N`. Click anywhere on that
 new line (or its pill) to change it to `1:1` / `N:N`, or delete it.
+
+## Status: Phase 4 — Code Generation Engine ✅
+
+Pure, framework-free functions that turn the current canvas (nodes + edges)
+into real SQL / Prisma / Drizzle code. Nothing here touches React — Phase 5
+just calls `generateCode(format, nodes, edges)` and renders the string.
+
+**New module: `lib/codegen/`**
+- **`naming.ts`** — casing helpers (`toPascalCase`, `toCamelCase`) and a
+  best-effort `pluralize`/`singularize` used only for relation field names.
+- **`resolve-schema.ts`** — the shared intermediate representation every
+  generator builds on: resolves each edge into concrete child/parent
+  table+column references (falling back to each table's primary key if a
+  specific column wasn't captured), and deterministically resolves
+  many-to-many join-table naming — including the self-referential case
+  (e.g. users following users), where both sides need distinct column
+  names (`_a` / `_b` suffixes).
+- **`type-maps.ts`** — canonical data type → native SQL / Prisma type.
+- **`generate-sql.ts`** — `CREATE TABLE` statements (composite PK support,
+  `UNIQUE`/`NOT NULL`/`DEFAULT`), auto-generated join tables for N:N, and
+  `ALTER TABLE ... FOREIGN KEY` constraints (plus a `UNIQUE` constraint on
+  the FK side for 1:1).
+- **`generate-prisma.ts`** — a complete `schema.prisma` (generator +
+  datasource header, singular PascalCase model names with `@@map` back to
+  the real table name, `@relation`-mapped fields, and Prisma's implicit
+  array-field many-to-many). Automatically disambiguates when a table has
+  two FKs to the same parent (e.g. `posts.author_id` / `posts.editor_id`
+  both → `users.id`) with named `@relation("Post_Author", ...)` pairs.
+- **`generate-drizzle.ts`** — a Drizzle `pg-core` schema: correctly-typed
+  column builders, chained `.primaryKey()/.notNull()/.unique()/.default()
+  /.references()`, composite PKs via table-level `primaryKey({ columns })`,
+  join tables for N:N, and a `relations()` block per table for Drizzle's
+  relational query API.
+- **`index.ts`** — the single `generateCode(format, nodes, edges)`
+  dispatcher Phase 5's export panel will call.
+
+**How this was verified** (not just eyeballed): a fixture covering 1:1,
+1:N (including two FKs from the same table to the same parent), N:N,
+self-referential N:N, and a composite primary key was run through all
+three generators. That caught two real bugs before they shipped — a
+pluralization regex that turned "posts" into "postses", and a duplicate
+object-key bug in Drizzle's `relations()` blocks that would have silently
+dropped one of two FK relations pointing at the same parent table. Both
+are fixed. The resulting Prisma schema was then checked with a real
+Prisma-schema AST parser, and the Drizzle output was compiled for real
+against the actual `drizzle-orm` package with strict TypeScript — both
+pass clean.
+
+**Design choices worth knowing about:**
+- Prisma model names are singularized (`posts` → `Post`) per Prisma
+  convention; Drizzle/SQL keep your literal table name everywhere, since
+  neither has an equivalent "model name" concept.
+- Any user-supplied column default is treated as a raw SQL/Prisma/Drizzle
+  expression (via `sql\`...\`` in Drizzle) rather than guessed at as a
+  literal — so `now()`, `gen_random_uuid()`, or a plain `0` all work.
+- `pluralize`/`singularize` are intentionally simple heuristics (not a
+  full English pluralizer) — they only affect *derived* relation field
+  names, never the actual table/column identifiers you typed.
