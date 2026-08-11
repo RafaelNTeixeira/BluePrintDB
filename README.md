@@ -9,7 +9,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org)
 [![React Flow](https://img.shields.io/badge/React%20Flow-11-ff0072)](https://reactflow.dev)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=REPLACE_WITH_YOUR_GITHUB_REPO_URL)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/RafaelNTeixeira/BluePrintDB)
 
 </div>
 
@@ -72,11 +72,11 @@ static Next.js site that keeps your schema in memory on the client.
 
 <table>
   <tr>
-    <td width="50%">
+    <td width="29%">
       <img src="screenshots/table-node.png" alt="A table node close-up" width="100%" />
       <p align="center"><sub>Table node — columns, types, and constraints</sub></p>
     </td>
-    <td width="50%">
+    <td width="60%">
       <img src="screenshots/relationship-picker.png" alt="Relationship type picker" width="100%" />
       <p align="center"><sub>Click a relationship to set 1:1 / 1:N / N:N</sub></p>
     </td>
@@ -184,5 +184,3 @@ no separate "build" or "sync" step.
 MIT — do whatever you'd like with it.
 
 ---
-
-<sub>See <a href="PHASES.md">PHASES.md</a> for the phase-by-phase build log this project was developed with.</sub>
