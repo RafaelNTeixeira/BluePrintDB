@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "reactflow/dist/style.css";
 import "./globals.css";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
   title: "BluePrintDB — Visual Database Schema & Code Generator",
@@ -16,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="h-screen w-screen overflow-hidden bg-[#0B2138] text-[#EAF4FB] antialiased">
-        {children}
+        <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
       </body>
     </html>
   );
